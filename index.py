@@ -7,8 +7,10 @@ from flask_script import Manager
 from flask_apidoc import ApiDoc
 from flask_apidoc.commands import GenerateApiDoc
 
+from models import db
 from utils.sentry import sentry
 from utils.response import MESSAGE
+
 
 app = Flask(__name__)
 sentry.init_app(app)
@@ -16,6 +18,16 @@ api.init_app(app)
 doc = ApiDoc(app=app)
 manager = Manager(app)
 manager.add_command('apidoc', GenerateApiDoc())
+
+@app.before_request
+def _db_connect():
+    if db.is_closed():
+        db.connect()
+
+@app.teardown_request
+def _db_close(exc):
+    if not db.is_closed():
+        db.close()
 
 @app.after_request
 def after_request(response):
