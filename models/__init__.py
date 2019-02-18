@@ -1,7 +1,6 @@
 #coding:utf-8
 
 import uuid
-import requests
 from datetime import datetime
 from playhouse.shortcuts import model_to_dict
 from peewee import MySQLDatabase, PostgresqlDatabase, Model, Field, BooleanField, DateTimeField, CharField, IntegerField

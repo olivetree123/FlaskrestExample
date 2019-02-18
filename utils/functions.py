@@ -1,12 +1,10 @@
 #coding:utf-8
 import uuid
 import hashlib
-import requests
 from decimal import Decimal
 from datetime import datetime
 
 from utils.sentry import loginfo
-from config import REQUEST_CACHE_KEY
 
 UTC_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
