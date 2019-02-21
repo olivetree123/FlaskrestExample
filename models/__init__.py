@@ -35,9 +35,8 @@ class UUIDField(Field):
 
 
 class BaseModel(Model):
-    """A base model that will use our Sqlite database."""
-    uid    = UUIDField(null=False, primary_key=True, default=uuid.uuid4)
-    status = BooleanField(default=True, null=False, help_text="0 delete, 1 normal")
+    uid    = UUIDField(null=False, default=uuid.uuid4, unique=True, help_text="uid 不是主键，但是要当做主键来用")
+    is_deleted  = BooleanField(default=False, null=False, help_text="1 delete, 0 normal")
     create_time = DateTimeField(default=datetime.now)
 
     class Meta:
@@ -47,24 +46,57 @@ class BaseModel(Model):
     def get_with_uid(cls, uid):
         if not uid:
             return None
-        return cls.get_or_none(cls.uid == uid, cls.status == True)
+        return cls.get_or_none(cls.uid == uid, cls.is_deleted == False)
     
     @classmethod
     def remove(cls, uid):
-        try:
-            r = cls.get(cls.uid == uid)
-            r.status = False
+        r = cls.get_with_uid(uid)
+        if r:
+            r.is_deleted = True
             r.save()
-        except:
-            r = None
         return r
     
     @classmethod
+    def _get_fields(cls):
+        fields = []
+        for field_name in cls.get_field_names():
+            field = cls._meta.fields[field_name]
+            fields.append(field)
+        return fields
+    
+    @classmethod
+    def verify_params(cls, **params):
+        # 验证 params 中的参数，主要验证非 None 字段是否有值
+        fields = cls._get_fields()
+        for field in fields:
+            if field.auto_increment or field.default is not None or field.null:
+                continue
+            if params.get(field.name) is None:
+                print("{} is None".format(field.name))
+                return False
+            # if field.unique:
+            #     r = cls.get_or_none(field==params.get(field.name))
+            #     if r:
+            #         print("Duplicate data, field = {}, value = {}".format(field.name, params.get(field.name)))
+            #         return False
+        return True
+    
+    @classmethod
+    def params_handler(cls, params):
+        # Model 继承该方法，处理参数
+        pass
+    
+    @classmethod
+    def create_data(cls, **params):
+        return cls.create(**params)
+    
+    @classmethod
     def list(cls):
-        return cls.select().where(cls.status == True)
-
+        return cls.select().where(cls.is_deleted == False)
+    
     def to_json(self):
         r = model_to_dict(self)
+        r.pop("id", None)
         for k, v in r.items():
             r[k] = field_to_json(v)
         return r

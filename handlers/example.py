@@ -1,4 +1,3 @@
-#coding:utf-8
 from flask_apidoc import ApiDoc
 from flask_restful import Resource, marshal_with
 
