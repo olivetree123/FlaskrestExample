@@ -57,6 +57,10 @@ class BaseModel(Model):
         return r
     
     @classmethod
+    def _get_field_names(cls):
+        return cls._meta.sorted_field_names
+    
+    @classmethod
     def _get_fields(cls):
         fields = []
         for field_name in cls.get_field_names():

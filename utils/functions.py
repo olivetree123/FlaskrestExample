@@ -3,8 +3,10 @@ import uuid
 import hashlib
 from decimal import Decimal
 from datetime import datetime
+from peewee import Model, ModelSelect
 
 from utils.sentry import loginfo
+
 
 UTC_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -48,6 +50,10 @@ def field_to_json(value):
         ret = str(value)
     elif isinstance(value, Decimal):
         ret = float(ret)
+    elif isinstance(value, ModelSelect):
+        ret = [field_to_json(_) for _ in value]
+    elif isinstance(value, Model):
+        ret = value.to_json()
     return ret
 
 def str_to_int(value):
