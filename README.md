@@ -2,6 +2,6 @@
 
 ## Run
 ```
-pip install -r requirements.txt
-python index.py runserver
+pip3 install -r requirements.txt
+python3 index.py runserver
 ```

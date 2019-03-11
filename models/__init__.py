@@ -86,6 +86,11 @@ class BaseModel(Model):
         return True
     
     @classmethod
+    def validate(cls, **params):
+        # 继承该方法，验证参数
+        pass
+    
+    @classmethod
     def params_handler(cls, params):
         # Model 继承该方法，处理参数
         pass
@@ -100,6 +105,7 @@ class BaseModel(Model):
     
     def to_json(self):
         r = model_to_dict(self)
+        # id 对使用者不可见
         r.pop("id", None)
         for k, v in r.items():
             r[k] = field_to_json(v)

@@ -1,14 +1,12 @@
-#coding:utf-8
 import uuid
 import hashlib
 from decimal import Decimal
-from datetime import datetime
+from datetime import date, datetime
 from peewee import Model, ModelSelect
 
-from utils.sentry import loginfo
 
-
-UTC_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 def content_md5(content):
     hash_md5 = hashlib.md5(content)
@@ -20,17 +18,19 @@ def file_md5(f):
         hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def datetime_to_str(_datetime, _format=UTC_DATETIME_FORMAT):
+def date_to_str(_date):
+    return _date.strftime(DATE_FORMAT)
+
+def datetime_to_str(_datetime, _format=DATETIME_FORMAT):
     return _datetime.strftime(_format)
 
-def str_to_datetime(time_str, _format=UTC_DATETIME_FORMAT):
+def str_to_datetime(time_str, _format=DATETIME_FORMAT):
     if not time_str:
         return None
     try:
         r = datetime.strptime(time_str, _format)
     except Exception as e:
         print(e)
-        loginfo("字符串转时间失败")
         return None
     return r
 
@@ -38,6 +38,8 @@ def field_to_json(value):
     ret = value
     if isinstance(value, datetime):
         ret = datetime_to_str(value)
+    elif isinstance(value, date):
+        ret = date_to_str(value)
     elif isinstance(value, list):
         ret = [field_to_json(_) for _ in value]
     elif isinstance(value, dict):
